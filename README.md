@@ -2,8 +2,8 @@
 
 基于 **Spring Boot + Vue 3** 的前后端分离自习室管理平台，支持在线预约、座位管理、支付宝沙箱支付、会员与积分、学习统计、留言互动、通知推送及 AI 助手（通义千问）等功能。
 
-## 效果图
-包含网站首页、用户登录、个人信息、查看/预约座位、出示入场凭证和ai智能体聊天功能
+## 部分页面效果图
+包含网站首页、用户登录、个人信息、查看/预约座位、出示入场凭证、学习时长统计ai智能体聊天功能。
 
 <img width="1918" height="906" alt="首页图" src="https://github.com/user-attachments/assets/9bf6c34e-6713-41de-bae1-b3c92ba0ec42" />
 <img width="1919" height="915" alt="登录" src="https://github.com/user-attachments/assets/4b50e0e1-0da1-4bb9-b702-fd4345ae2a0f" />
@@ -13,6 +13,8 @@
 <img width="1914" height="907" alt="我的预约" src="https://github.com/user-attachments/assets/3e1d82b8-5efd-465a-a3c1-c16a91e756b8" />
 <img width="1455" height="854" alt="预约表单" src="https://github.com/user-attachments/assets/db795947-dfaa-4c95-ad4b-c6afc3fd1633" />
 <img width="1919" height="909" alt="入场凭证_存在" src="https://github.com/user-attachments/assets/c1ce94ce-f1ec-4c89-b878-53b0d519296e" />
+<img width="1919" height="906" alt="学习时长统计" src="https://github.com/user-attachments/assets/f9f43b6a-8cb9-4185-a436-083362563fbf" />
+<img width="1916" height="917" alt="学习红人榜" src="https://github.com/user-attachments/assets/daec1b0d-9505-4f39-8368-b5b3119ed8c1" />
 <img width="1918" height="908" alt="小光智能体" src="https://github.com/user-attachments/assets/b69bf287-3778-4c05-9042-a90adc5ff199" />
 
 ## 技术栈
@@ -138,3 +140,4 @@ code/
 ## License
 
 本项目为毕业设计作品，仅供学习交流使用。
+如因毕业设计需要对拙作感兴趣，可以联系2403752197@qq.com。
