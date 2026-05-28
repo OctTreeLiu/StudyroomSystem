@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.StudyRoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.StudyRoom">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="room_number" property="roomNumber" jdbcType="VARCHAR"/>
+        <result column="room_name" property="roomName" jdbcType="VARCHAR"/>
+        <result column="capacity" property="capacity" jdbcType="INTEGER"/>
+        <result column="location" property="location" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="description" property="description" jdbcType="LONGVARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, room_number, room_name, capacity, location, status, description, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM study_room
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByRoomNumber" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM study_room
+        WHERE room_number = #{roomNumber}
+        LIMIT 1
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM study_room
+        ORDER BY room_number
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM study_room
+        WHERE status = #{status}
+        ORDER BY room_number
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.StudyRoom" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO study_room (room_number, room_name, capacity, location, status, description)
+        VALUES (#{roomNumber}, #{roomName}, #{capacity}, #{location}, #{status}, #{description})
+    </insert>
+
+    <update id="update" parameterType="com.studyspace.entity.StudyRoom">
+        UPDATE study_room
+        <set>
+            <if test="roomNumber != null">room_number = #{roomNumber},</if>
+            <if test="roomName != null">room_name = #{roomName},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+

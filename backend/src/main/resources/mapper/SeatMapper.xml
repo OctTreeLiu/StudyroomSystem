@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.SeatMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.Seat">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="room_id" property="roomId" jdbcType="BIGINT"/>
+        <result column="seat_number" property="seatNumber" jdbcType="VARCHAR"/>
+        <result column="seat_name" property="seatName" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="room_name" property="roomName" jdbcType="VARCHAR"/>
+        <result column="room_number" property="roomNumber" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        s.id, s.room_id, s.seat_number, s.seat_name, s.status, s.create_time, s.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM seat s
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="selectByRoomId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               sr.room_name, sr.room_number
+        FROM seat s
+        LEFT JOIN study_room sr ON s.room_id = sr.id
+        WHERE s.room_id = #{roomId}
+        ORDER BY s.seat_number ASC
+    </select>
+
+    <select id="selectByRoomIdAndStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               sr.room_name, sr.room_number
+        FROM seat s
+        LEFT JOIN study_room sr ON s.room_id = sr.id
+        WHERE s.room_id = #{roomId} AND s.status = #{status}
+        ORDER BY s.seat_number ASC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               sr.room_name, sr.room_number
+        FROM seat s
+        LEFT JOIN study_room sr ON s.room_id = sr.id
+        ORDER BY s.room_id ASC, s.seat_number ASC
+    </select>
+
+    <!-- 根据时间段查询可用座位：排除维护中、已锁定、已预约、被长期租赁的座位，以及时间段内有冲突的预约和长期租赁 -->
+    <select id="selectAvailableSeatsByTimeRange" resultMap="BaseResultMap">
+        SELECT DISTINCT <include refid="Base_Column_List"/>,
+               sr.room_name, sr.room_number
+        FROM seat s
+        LEFT JOIN study_room sr ON s.room_id = sr.id
+        LEFT JOIN reservation r_conflict ON r_conflict.seat_id = s.id
+            AND r_conflict.room_id = #{roomId}
+            AND r_conflict.status != 4
+            AND r_conflict.status != 3
+            AND (
+                (r_conflict.start_time &lt;= #{startTime} AND r_conflict.end_time &gt; #{startTime})
+                OR (r_conflict.start_time &lt; #{endTime} AND r_conflict.end_time &gt;= #{endTime})
+                OR (r_conflict.start_time &gt;= #{startTime} AND r_conflict.end_time &lt;= #{endTime})
+            )
+        LEFT JOIN long_term_lease l_conflict ON l_conflict.seat_id = s.id
+            AND l_conflict.room_id = #{roomId}
+            AND l_conflict.status = 2
+            AND DATE(l_conflict.start_date) &lt;= DATE(#{endTime})
+            AND DATE(l_conflict.end_date) &gt;= DATE(#{startTime})
+        WHERE s.room_id = #{roomId}
+          AND s.status = 0
+          AND r_conflict.id IS NULL
+          AND l_conflict.id IS NULL
+        ORDER BY s.seat_number ASC
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.Seat" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO seat (room_id, seat_number, seat_name, status)
+        VALUES (#{roomId}, #{seatNumber}, #{seatName}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.studyspace.entity.Seat">
+        UPDATE seat
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="seatName != null">seat_name = #{seatName},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+

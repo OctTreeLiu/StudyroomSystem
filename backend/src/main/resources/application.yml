@@ -1,0 +1,77 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: studyroom-management
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/studyroom_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: 
+    password: 
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+# MyBatis配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.studyspace.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志配置
+logging:
+  level:
+    root: info
+    com.studyspace: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+
+# 支付宝配置
+alipay:
+  app-id: 9021000158671583
+  # 应用私钥（PKCS8格式，包含完整的BEGIN和END标记）
+  app-private-key: |
+    
+  # 支付宝公钥（从支付宝开放平台获取，包含完整的BEGIN和END标记）
+  alipay-public-key: |
+    
+
+  sign-type: RSA2
+  charset: UTF-8
+  # 官方沙箱网关地址（建议使用这个）
+  gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+
+
+  return-url: http://localhost:8080/api/reservation/pay/return
+  # 本地开发环境下，支付宝服务器无法访问 localhost，这里仅用于同步回调
+  notify-url: http://localhost:8080/api/reservation/pay/notify
+  # 前端站点基础地址（支付完成后回跳用，需与实际访问前端的域名一致）
+  frontend-base-url: http://localhost:3000
+
+## 大模型配置（OpenAI 兼容 Chat Completions）
+## 必需项：ai.api-key / ai.base-url / ai.model
+## 建议：敏感信息使用环境变量覆盖，而不是直接写在仓库里。
+ai:
+  # API Key（会在运行时作为 Bearer token 发送）
+  api-key:
+  # OpenAI 兼容接口的 base-url（通义千问 / DashScope）
+  # 默认使用国内节点（如需国际/其他节点可改为下方备用地址）
+  base-url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  # 通义千问模型名（按你 DashScope 控制台实际可用的模型填写）
+  model: "qwen3-max"
+
+  # 可选：请求超时（秒），不填会使用 AiModelConfig 的默认值 30
+  timeout-seconds: 30
+
+  # 是否启用联网搜索（DashScope compatible-mode：enable_search）
+  # 开启后会更依赖搜索结果，且可能增加费用（按模型/搜索策略计费）
+  enable-search: true
+  # 联网搜索策略（DashScope：search_options.search_strategy），示例：agent
+  search-strategy: "agent"
+

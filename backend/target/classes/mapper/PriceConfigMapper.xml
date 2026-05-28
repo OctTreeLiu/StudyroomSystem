@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.PriceConfigMapper">
+    
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.PriceConfig">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="config_key" property="configKey" jdbcType="VARCHAR"/>
+        <result column="config_value" property="configValue" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, config_key, config_value, description, create_time, update_time
+    </sql>
+    
+    <!-- 根据配置键查询 -->
+    <select id="selectByKey" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM price_config
+        WHERE config_key = #{configKey}
+    </select>
+    
+    <!-- 查询所有配置 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM price_config
+        ORDER BY config_key ASC
+    </select>
+    
+    <!-- 插入配置 -->
+    <insert id="insert" parameterType="com.studyspace.entity.PriceConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO price_config (config_key, config_value, description, create_time, update_time)
+        VALUES (#{configKey}, #{configValue}, #{description}, NOW(), NOW())
+    </insert>
+    
+    <!-- 更新配置 -->
+    <update id="update" parameterType="com.studyspace.entity.PriceConfig">
+        UPDATE price_config
+        SET config_value = #{configValue},
+            description = #{description},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+    
+    <!-- 根据ID删除 -->
+    <delete id="deleteById">
+        DELETE FROM price_config WHERE id = #{id}
+    </delete>
+    
+    <!-- 根据配置键删除 -->
+    <delete id="deleteByKey">
+        DELETE FROM price_config WHERE config_key = #{configKey}
+    </delete>
+    
+</mapper>
+

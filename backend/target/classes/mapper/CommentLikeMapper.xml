@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.CommentLikeMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.CommentLike">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="comment_id" property="commentId" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="selectByCommentIdAndUserId" resultMap="BaseResultMap">
+        SELECT id, comment_id, user_id, create_time
+        FROM comment_like
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <select id="countByCommentId" resultType="int">
+        SELECT COUNT(*)
+        FROM comment_like
+        WHERE comment_id = #{commentId}
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.CommentLike" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment_like (comment_id, user_id)
+        VALUES (#{commentId}, #{userId})
+    </insert>
+
+    <delete id="deleteByCommentIdAndUserId">
+        DELETE FROM comment_like WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByCommentId">
+        DELETE FROM comment_like WHERE comment_id = #{commentId}
+    </delete>
+
+</mapper>
+

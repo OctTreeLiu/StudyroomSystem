@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.AdminCallMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.AdminCall">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="seat_info" property="seatInfo" jdbcType="VARCHAR"/>
+        <result column="message" property="message" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="handle_time" property="handleTime" jdbcType="TIMESTAMP"/>
+        <result column="handle_admin_id" property="handleAdminId" jdbcType="BIGINT"/>
+        <result column="handle_admin_name" property="handleAdminName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ac.id, ac.user_id, ac.username, ac.phone, ac.seat_info, ac.message, 
+        ac.status, ac.create_time, ac.handle_time, ac.handle_admin_id
+    </sql>
+
+    <insert id="insert" parameterType="com.studyspace.entity.AdminCall" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admin_call (user_id, username, phone, seat_info, message, status)
+        VALUES (#{userId}, #{username}, #{phone}, #{seatInfo}, #{message}, #{status})
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_call ac
+        WHERE ac.id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as handle_admin_name
+        FROM admin_call ac
+        LEFT JOIN user u ON ac.handle_admin_id = u.id
+        ORDER BY ac.create_time DESC
+    </select>
+
+    <select id="selectAllWithPagination" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as handle_admin_name
+        FROM admin_call ac
+        LEFT JOIN user u ON ac.handle_admin_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (ac.username LIKE CONCAT('%', #{keyword}, '%')
+                OR CAST(ac.user_id AS CHAR) LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY ac.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as handle_admin_name
+        FROM admin_call ac
+        LEFT JOIN user u ON ac.handle_admin_id = u.id
+        WHERE ac.status = #{status}
+        ORDER BY ac.create_time DESC
+    </select>
+
+    <select id="selectByStatusWithPagination" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as handle_admin_name
+        FROM admin_call ac
+        LEFT JOIN user u ON ac.handle_admin_id = u.id
+        <where>
+            <if test="status != null">
+                ac.status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (ac.username LIKE CONCAT('%', #{keyword}, '%')
+                     OR CAST(ac.user_id AS CHAR) LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY ac.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*)
+        FROM admin_call
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (username LIKE CONCAT('%', #{keyword}, '%')
+                OR CAST(user_id AS CHAR) LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*)
+        FROM admin_call
+        <where>
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (username LIKE CONCAT('%', #{keyword}, '%')
+                     OR CAST(user_id AS CHAR) LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_call ac
+        WHERE ac.user_id = #{userId}
+        ORDER BY ac.create_time DESC
+    </select>
+
+    <update id="update" parameterType="com.studyspace.entity.AdminCall">
+        UPDATE admin_call
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="handleTime != null">handle_time = #{handleTime},</if>
+            <if test="handleAdminId != null">handle_admin_id = #{handleAdminId},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="countPending" resultType="int">
+        SELECT COUNT(*)
+        FROM admin_call
+        WHERE status = 0
+    </select>
+
+</mapper>
+

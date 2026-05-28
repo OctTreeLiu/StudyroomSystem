@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.studyspace.mapper.ExtraChargeOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.ExtraChargeOrder">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="order_number" property="orderNumber" jdbcType="VARCHAR"/>
+        <result column="amount" property="amount" jdbcType="DECIMAL"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="payment_status" property="paymentStatus" jdbcType="TINYINT"/>
+        <result column="payment_time" property="paymentTime" jdbcType="TIMESTAMP"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, order_number, amount, content, payment_status, payment_time, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.studyspace.entity.ExtraChargeOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO extra_charge_order (user_id, order_number, amount, content, payment_status, payment_time, create_time, update_time)
+        VALUES (#{userId}, #{orderNumber}, #{amount}, #{content}, #{paymentStatus}, #{paymentTime}, NOW(), NOW())
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM extra_charge_order
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderNumber" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM extra_charge_order
+        WHERE order_number = #{orderNumber}
+    </select>
+
+    <select id="selectByUserIdWithPagination" resultMap="BaseResultMap">
+        SELECT eco.id, eco.user_id, eco.order_number, eco.amount, eco.content, 
+               eco.payment_status, eco.payment_time, eco.create_time, eco.update_time,
+               u.username
+        FROM extra_charge_order eco
+        LEFT JOIN user u ON eco.user_id = u.id
+        WHERE eco.user_id = #{userId}
+        ORDER BY eco.create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM extra_charge_order
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectAllWithPagination" resultMap="BaseResultMap">
+        SELECT eco.id, eco.user_id, eco.order_number, eco.amount, eco.content, 
+               eco.payment_status, eco.payment_time, eco.create_time, eco.update_time,
+               u.username
+        FROM extra_charge_order eco
+        LEFT JOIN user u ON eco.user_id = u.id
+        ORDER BY eco.create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM extra_charge_order
+    </select>
+
+    <select id="selectByUserIdAndStatusWithPagination" resultMap="BaseResultMap">
+        SELECT eco.id, eco.user_id, eco.order_number, eco.amount, eco.content, 
+               eco.payment_status, eco.payment_time, eco.create_time, eco.update_time,
+               u.username
+        FROM extra_charge_order eco
+        LEFT JOIN user u ON eco.user_id = u.id
+        WHERE eco.user_id = #{userId}
+        <if test="paymentStatus != null">
+            AND eco.payment_status = #{paymentStatus}
+        </if>
+        ORDER BY eco.create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countByUserIdAndStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM extra_charge_order
+        WHERE user_id = #{userId}
+        <if test="paymentStatus != null">
+            AND payment_status = #{paymentStatus}
+        </if>
+    </select>
+
+    <update id="update" parameterType="com.studyspace.entity.ExtraChargeOrder">
+        UPDATE extra_charge_order
+        SET payment_status = #{paymentStatus},
+            payment_time = #{paymentTime},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="countUnpaidOrders" resultType="long">
+        SELECT COUNT(*)
+        FROM extra_charge_order
+        WHERE payment_status = 0
+    </select>
+
+    <select id="countUnpaidOrdersByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM extra_charge_order
+        WHERE user_id = #{userId} AND payment_status = 0
+    </select>
+
+    <select id="selectExpiredUnpaidOrders" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM extra_charge_order
+        WHERE payment_status = 0
+        AND create_time &lt; DATE_SUB(NOW(), INTERVAL 24 HOUR)
+    </select>
+
+</mapper>
+

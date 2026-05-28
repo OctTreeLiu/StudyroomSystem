@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.studyspace.mapper.MemoMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.Memo">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="LONGVARCHAR"/>
+        <result column="memo_date" property="memoDate" jdbcType="DATE"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, title, content, memo_date, status, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM memo
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM memo
+        WHERE user_id = #{userId}
+        ORDER BY memo_date DESC, create_time DESC
+    </select>
+
+    <select id="selectByUserIdWithPagination" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM memo
+        WHERE user_id = #{userId}
+        ORDER BY memo_date DESC, create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM memo
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectByUserIdAndDate" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM memo
+        WHERE user_id = #{userId}
+        AND memo_date = #{memoDate}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByUserIdAndStatus" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM memo
+        WHERE user_id = #{userId}
+        AND status = #{status}
+        ORDER BY memo_date DESC, create_time DESC
+    </select>
+
+    <select id="countUnprocessedByUserIdAndDate" resultType="int">
+        SELECT COUNT(*)
+        FROM memo
+        WHERE user_id = #{userId}
+        AND memo_date = #{memoDate}
+        AND status = 0
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.Memo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO memo (user_id, title, content, memo_date, status, create_time, update_time)
+        VALUES (#{userId}, #{title}, #{content}, #{memoDate}, #{status}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.studyspace.entity.Memo">
+        UPDATE memo
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="memoDate != null">memo_date = #{memoDate},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectByUserIdWithFilters" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM memo
+        WHERE user_id = #{userId}
+        <if test="memoDate != null">
+            AND memo_date = #{memoDate}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY memo_date DESC, create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countByUserIdWithFilters" resultType="long">
+        SELECT COUNT(*)
+        FROM memo
+        WHERE user_id = #{userId}
+        <if test="memoDate != null">
+            AND memo_date = #{memoDate}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM memo
+        WHERE id = #{id}
+    </delete>
+
+</mapper>
+

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.UsageRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.UsageRecord">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="room_id" property="roomId" jdbcType="BIGINT"/>
+        <result column="seat_id" property="seatId" jdbcType="BIGINT"/>
+        <result column="reservation_id" property="reservationId" jdbcType="BIGINT"/>
+        <result column="lease_id" property="leaseId" jdbcType="BIGINT"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="duration" property="duration" jdbcType="INTEGER"/>
+        <result column="type" property="type" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="room_name" property="roomName" jdbcType="VARCHAR"/>
+        <result column="room_number" property="roomNumber" jdbcType="VARCHAR"/>
+        <result column="seat_number" property="seatNumber" jdbcType="VARCHAR"/>
+        <result column="seat_name" property="seatName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ur.id, ur.user_id, ur.room_id, ur.seat_id, ur.reservation_id, ur.lease_id,
+        ur.start_time, ur.end_time, ur.duration, ur.type, ur.create_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM usage_record ur
+        WHERE ur.id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM usage_record ur
+        LEFT JOIN user u ON ur.user_id = u.id
+        LEFT JOIN study_room sr ON ur.room_id = sr.id
+        LEFT JOIN seat s ON ur.seat_id = s.id
+        WHERE ur.user_id = #{userId}
+        ORDER BY ur.start_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM usage_record ur
+        LEFT JOIN user u ON ur.user_id = u.id
+        LEFT JOIN study_room sr ON ur.room_id = sr.id
+        LEFT JOIN seat s ON ur.seat_id = s.id
+        ORDER BY ur.start_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.UsageRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO usage_record (user_id, room_id, seat_id, reservation_id, lease_id, start_time, end_time, duration, type)
+        VALUES (#{userId}, #{roomId}, #{seatId}, #{reservationId}, #{leaseId}, #{startTime}, #{endTime}, #{duration}, #{type})
+    </insert>
+
+    <select id="selectByReservationId" resultMap="BaseResultMap">
+        SELECT ur.id, ur.user_id, ur.room_id, ur.reservation_id, ur.lease_id,
+               ur.start_time, ur.end_time, ur.duration, ur.type, ur.create_time
+        FROM usage_record ur
+        WHERE ur.reservation_id = #{reservationId}
+        LIMIT 1
+    </select>
+
+    <update id="update" parameterType="com.studyspace.entity.UsageRecord">
+        UPDATE usage_record
+        <set>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="duration != null">duration = #{duration},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 统计用户在指定时间范围内的总学习时长（包含预约和长期租赁） -->
+    <select id="sumDurationByUserIdAndTimeRange" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(duration), 0)
+        FROM usage_record
+        WHERE user_id = #{userId}
+          AND end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        <!-- 注意：此查询包含所有类型的使用记录（type=1预约使用，type=2长期租赁使用） -->
+    </select>
+
+    <!-- 统计所有用户在指定时间范围内的总学习时长（包含预约和长期租赁） -->
+    <select id="sumDurationByTimeRange" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(duration), 0)
+        FROM usage_record
+        WHERE end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        <!-- 注意：此查询包含所有类型的使用记录（type=1预约使用，type=2长期租赁使用） -->
+    </select>
+
+    <select id="getDailyStatisticsByUserId" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(end_time, '%Y-%m-%d') as date,
+            SUM(duration) as minutes
+        FROM usage_record
+        WHERE user_id = #{userId}
+          AND end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        GROUP BY DATE_FORMAT(end_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="getDailyStatistics" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(end_time, '%Y-%m-%d') as date,
+            SUM(duration) as minutes
+        FROM usage_record
+        WHERE end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        GROUP BY DATE_FORMAT(end_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="getWeeklyStatistics" resultType="java.util.HashMap">
+        SELECT 
+            CONCAT(YEAR(end_time), '-W', LPAD(WEEK(end_time, 1), 2, '0')) as date,
+            SUM(duration) as minutes
+        FROM usage_record
+        WHERE end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        GROUP BY YEAR(end_time), WEEK(end_time, 1)
+        ORDER BY date ASC
+    </select>
+
+    <select id="getMonthlyStatistics" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(end_time, '%Y-%m') as date,
+            SUM(duration) as minutes
+        FROM usage_record
+        WHERE end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        GROUP BY DATE_FORMAT(end_time, '%Y-%m')
+        ORDER BY date ASC
+    </select>
+
+    <select id="getTopUsersByStudyTime" resultType="java.util.HashMap">
+        SELECT 
+            ur.user_id as userId,
+            COALESCE(u.username, '') as username,
+            COALESCE(u.real_name, '') as realName,
+            COALESCE(SUM(ur.duration), 0) as minutes
+        FROM usage_record ur
+        LEFT JOIN user u ON ur.user_id = u.id
+        WHERE ur.end_time IS NOT NULL
+          AND ur.end_time >= #{startTime}
+          AND ur.end_time &lt;= #{endTime}
+          AND ur.duration IS NOT NULL
+          AND ur.duration > 0
+        GROUP BY ur.user_id, u.username, u.real_name
+        HAVING minutes > 0
+        ORDER BY minutes DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取用户在指定时间范围内的每小时统计（过去24小时） -->
+    <select id="getHourlyStatisticsByUserId" resultType="java.util.HashMap">
+        SELECT 
+            HOUR(end_time) as hour,
+            SUM(duration) as minutes
+        FROM usage_record
+        WHERE user_id = #{userId}
+          AND end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        GROUP BY HOUR(end_time)
+        ORDER BY hour ASC
+    </select>
+
+    <!-- 获取所有用户在指定时间范围内的每小时统计（过去24小时） -->
+    <select id="getHourlyStatistics" resultType="java.util.HashMap">
+        SELECT 
+            HOUR(end_time) as hour,
+            SUM(duration) as minutes
+        FROM usage_record
+        WHERE end_time IS NOT NULL
+          AND end_time >= #{startTime}
+          AND end_time &lt;= #{endTime}
+        GROUP BY HOUR(end_time)
+        ORDER BY hour ASC
+    </select>
+
+    <!-- 获取用户在指定时间范围内的使用记录详情（用于按日期拆分统计） -->
+    <select id="selectUsageRecordsByUserIdAndTimeRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM usage_record ur
+        WHERE ur.user_id = #{userId}
+          AND ur.start_time IS NOT NULL
+          AND ur.end_time IS NOT NULL
+          AND ur.type = 1
+          AND (
+            (ur.start_time >= #{startTime} AND ur.start_time &lt;= #{endTime})
+            OR (ur.end_time >= #{startTime} AND ur.end_time &lt;= #{endTime})
+            OR (ur.start_time &lt;= #{startTime} AND ur.end_time >= #{endTime})
+          )
+        ORDER BY ur.start_time ASC
+    </select>
+
+    <!-- 获取所有用户在指定时间范围内的使用记录详情（用于按日期拆分统计） -->
+    <select id="selectUsageRecordsByTimeRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM usage_record ur
+        WHERE ur.start_time IS NOT NULL
+          AND ur.end_time IS NOT NULL
+          AND ur.type = 1
+          AND (
+            (ur.start_time >= #{startTime} AND ur.start_time &lt;= #{endTime})
+            OR (ur.end_time >= #{startTime} AND ur.end_time &lt;= #{endTime})
+            OR (ur.start_time &lt;= #{startTime} AND ur.end_time >= #{endTime})
+          )
+        ORDER BY ur.start_time ASC
+    </select>
+
+</mapper>
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.AnnouncementMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.Announcement">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="LONGVARCHAR"/>
+        <result column="publisher_id" property="publisherId" jdbcType="BIGINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="publisher_name" property="publisherName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        a.id, a.title, a.content, a.publisher_id, a.status, a.create_time, a.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM announcement a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="selectAllPublished" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as publisher_name
+        FROM announcement a
+        LEFT JOIN user u ON a.publisher_id = u.id
+        WHERE a.status = 1
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as publisher_name
+        FROM announcement a
+        LEFT JOIN user u ON a.publisher_id = u.id
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectAllPublishedWithPagination" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username as publisher_name
+        FROM announcement a
+        LEFT JOIN user u ON a.publisher_id = u.id
+        WHERE a.status = 1
+        ORDER BY a.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAllPublished" resultType="int">
+        SELECT COUNT(*)
+        FROM announcement
+        WHERE status = 1
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.Announcement" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO announcement (title, content, publisher_id, status)
+        VALUES (#{title}, #{content}, #{publisherId}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.studyspace.entity.Announcement">
+        UPDATE announcement
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE announcement
+        SET status = 0
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+

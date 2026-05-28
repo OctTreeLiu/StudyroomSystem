@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.LongTermLeaseMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.LongTermLease">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="room_id" property="roomId" jdbcType="BIGINT"/>
+        <result column="seat_id" property="seatId" jdbcType="BIGINT"/>
+        <result column="lease_number" property="leaseNumber" jdbcType="VARCHAR"/>
+        <result column="start_date" property="startDate" jdbcType="DATE"/>
+        <result column="end_date" property="endDate" jdbcType="DATE"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="payment_status" property="paymentStatus" jdbcType="TINYINT"/>
+        <result column="payment_deadline" property="paymentDeadline" jdbcType="TIMESTAMP"/>
+        <result column="payment_time" property="paymentTime" jdbcType="TIMESTAMP"/>
+        <result column="amount" property="amount" jdbcType="DECIMAL"/>
+        <result column="trade_no" property="tradeNo" jdbcType="VARCHAR"/>
+        <result column="apply_reason" property="applyReason" jdbcType="LONGVARCHAR"/>
+        <result column="audit_remark" property="auditRemark" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="room_name" property="roomName" jdbcType="VARCHAR"/>
+        <result column="room_number" property="roomNumber" jdbcType="VARCHAR"/>
+        <result column="seat_number" property="seatNumber" jdbcType="VARCHAR"/>
+        <result column="seat_name" property="seatName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        l.id, l.user_id, l.room_id, l.seat_id, l.lease_number, l.start_date, l.end_date,
+        l.status, l.payment_status, l.payment_deadline, l.payment_time, l.amount, l.trade_no,
+        l.apply_reason, l.audit_remark, l.create_time, l.update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        WHERE l.id = #{id}
+    </select>
+
+    <select id="selectByLeaseNumber" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        WHERE l.lease_number = #{leaseNumber}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        WHERE l.user_id = #{userId}
+        ORDER BY l.create_time DESC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        ORDER BY l.create_time DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        WHERE l.status = #{status}
+        ORDER BY l.create_time DESC
+    </select>
+
+    <select id="selectActiveByRoomId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.room_id = #{roomId}
+          AND l.status IN (2, 5, 6)
+          AND CURDATE() BETWEEN l.start_date AND l.end_date
+        LIMIT 1
+    </select>
+    
+    <select id="selectActiveBySeatId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.seat_id = #{seatId}
+          AND l.status IN (2, 5, 6)
+          AND CURDATE() BETWEEN l.start_date AND l.end_date
+        LIMIT 1
+    </select>
+    
+    <select id="selectCurrentActiveLeaseByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        WHERE l.user_id = #{userId}
+          AND l.status IN (2, 5, 6)
+          AND CURDATE() BETWEEN l.start_date AND l.end_date
+        ORDER BY l.start_date ASC
+        LIMIT 1
+    </select>
+    
+    <!-- 查询用户在指定时间段内是否有生效的长期租赁订单 -->
+    <select id="selectActiveLeaseByUserIdAndTimeRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username, sr.room_name, sr.room_number, s.seat_number, s.seat_name
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        LEFT JOIN study_room sr ON l.room_id = sr.id
+        LEFT JOIN seat s ON l.seat_id = s.id
+        WHERE l.user_id = #{userId}
+          AND l.status IN (2, 5, 6)
+          AND l.start_date &lt;= DATE(#{endTime})
+          AND l.end_date &gt;= DATE(#{startTime})
+        ORDER BY l.start_date ASC
+        LIMIT 1
+    </select>
+
+    <select id="countPending" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM long_term_lease l
+        WHERE l.status = 0
+    </select>
+
+    <select id="selectExpiredUnpaidLeases" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.status = 1
+          AND l.payment_status = 0
+          AND (
+              (l.payment_deadline IS NOT NULL AND l.payment_deadline &lt;= NOW())
+              OR (l.payment_deadline IS NULL AND l.create_time &lt;= DATE_SUB(NOW(), INTERVAL 2 HOUR))
+          )
+    </select>
+
+    <select id="selectUnpaidLeasesBySeatId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.seat_id = #{seatId}
+          AND l.payment_status = 0
+          AND l.status IN (0, 1)
+    </select>
+
+    <select id="selectConflictingLeasesByTimeRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.seat_id = #{seatId}
+          AND l.status IN (2, 5, 6)
+          AND DATE(l.start_date) &lt;= DATE(#{endTime})
+          AND DATE(l.end_date) &gt;= DATE(#{startTime})
+    </select>
+
+    <select id="selectLeasesBySeatIdAndDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.username
+        FROM long_term_lease l
+        LEFT JOIN user u ON l.user_id = u.id
+        WHERE l.seat_id = #{seatId}
+          AND l.status IN (2, 5, 6)
+          AND DATE(l.start_date) &lt;= #{date}
+          AND DATE(l.end_date) &gt;= #{date}
+        ORDER BY l.start_date ASC
+    </select>
+
+    <!-- 查询用户在指定日期范围内有效的长期租赁记录 -->
+    <select id="selectActiveLeasesByUserIdAndDateRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.user_id = #{userId}
+          AND l.status IN (2, 5, 6)
+          AND l.start_date &lt;= #{endDate}
+          AND l.end_date &gt;= #{startDate}
+        ORDER BY l.start_date ASC
+    </select>
+
+    <!-- 查询所有用户在指定日期范围内有效的长期租赁记录 -->
+    <select id="selectAllActiveLeasesByDateRange" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM long_term_lease l
+        WHERE l.status IN (2, 5, 6)
+          AND l.start_date &lt;= #{endDate}
+          AND l.end_date &gt;= #{startDate}
+        ORDER BY l.start_date ASC
+    </select>
+
+    <select id="existsActiveLeaseBySeatId" resultType="boolean">
+        SELECT COUNT(1) &gt; 0
+        FROM long_term_lease l
+        WHERE l.seat_id = #{seatId}
+          AND l.payment_status = 1
+          AND l.status IN (2, 5, 6)
+          AND CURDATE() BETWEEN l.start_date AND l.end_date
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.LongTermLease" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO long_term_lease (
+            user_id, room_id, seat_id, lease_number, start_date, end_date,
+            status, payment_status, payment_deadline, amount, apply_reason, audit_remark
+        )
+        VALUES (
+            #{userId}, #{roomId}, #{seatId}, #{leaseNumber}, #{startDate}, #{endDate},
+            #{status}, #{paymentStatus}, #{paymentDeadline}, #{amount}, #{applyReason}, #{auditRemark}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.studyspace.entity.LongTermLease">
+        UPDATE long_term_lease
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="paymentStatus != null">payment_status = #{paymentStatus},</if>
+            <if test="paymentDeadline != null">payment_deadline = #{paymentDeadline},</if>
+            <if test="paymentTime != null">payment_time = #{paymentTime},</if>
+            <if test="tradeNo != null">trade_no = #{tradeNo},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+

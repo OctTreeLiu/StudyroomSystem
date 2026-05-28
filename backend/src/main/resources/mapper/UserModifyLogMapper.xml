@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.studyspace.mapper.UserModifyLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.UserModifyLog">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="admin_id" property="adminId" jdbcType="BIGINT"/>
+        <result column="admin_username" property="adminUsername" jdbcType="VARCHAR"/>
+        <result column="user_username" property="userUsername" jdbcType="VARCHAR"/>
+        <result column="before_member_type" property="beforeMemberType" jdbcType="TINYINT"/>
+        <result column="after_member_type" property="afterMemberType" jdbcType="TINYINT"/>
+        <result column="before_member_expire_time" property="beforeMemberExpireTime" jdbcType="TIMESTAMP"/>
+        <result column="after_member_expire_time" property="afterMemberExpireTime" jdbcType="TIMESTAMP"/>
+        <result column="modify_detail" property="modifyDetail" jdbcType="LONGVARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, admin_id, admin_username, user_username, before_member_type, after_member_type,
+        before_member_expire_time, after_member_expire_time, modify_detail, create_time
+    </sql>
+
+    <insert id="insert" parameterType="com.studyspace.entity.UserModifyLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_modify_log (user_id, admin_id, admin_username, user_username,
+                                     before_member_type, after_member_type,
+                                     before_member_expire_time, after_member_expire_time,
+                                     modify_detail, create_time)
+        VALUES (#{userId}, #{adminId}, #{adminUsername}, #{userUsername},
+                #{beforeMemberType}, #{afterMemberType},
+                #{beforeMemberExpireTime}, #{afterMemberExpireTime},
+                #{modifyDetail}, NOW())
+    </insert>
+
+    <select id="selectRecentLogs" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_modify_log
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (user_username LIKE CONCAT('%', #{keyword}, '%')
+                OR CAST(user_id AS CHAR) LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM user_modify_log
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (user_username LIKE CONCAT('%', #{keyword}, '%')
+                OR CAST(user_id AS CHAR) LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_modify_log
+        WHERE id = #{id}
+    </select>
+
+</mapper>
+

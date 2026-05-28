@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.AdminContactMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.AdminContact">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, phone, email, create_time, update_time
+    </sql>
+
+    <select id="selectFirst" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_contact
+        ORDER BY id ASC
+        LIMIT 1
+    </select>
+
+    <update id="update" parameterType="com.studyspace.entity.AdminContact">
+        UPDATE admin_contact
+        <set>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="com.studyspace.entity.AdminContact" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admin_contact (phone, email)
+        VALUES (#{phone}, #{email})
+    </insert>
+
+</mapper>
+

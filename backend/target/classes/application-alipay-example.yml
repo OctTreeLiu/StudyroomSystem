@@ -1,0 +1,35 @@
+# 支付宝配置示例文件
+# 复制此文件内容到 application.yml 并填入实际的配置值
+
+alipay:
+  # 应用ID（从支付宝开放平台获取）
+  app-id: 9021000158671583
+  
+  # 应用私钥（PKCS8格式，包含完整的BEGIN和END标记）
+  app-private-key: |
+    
+  # 支付宝公钥（从支付宝开放平台获取，包含完整的BEGIN和END标记）
+  alipay-public-key: |
+   
+  
+  # 签名方式（固定为RSA2）
+  sign-type: RSA2
+  
+  # 字符编码（固定为UTF-8）
+  charset: UTF-8
+  
+  # 支付宝网关地址
+  # 沙箱环境：https://openapi-sandbox.dl.alipaydev.com/gateway.do
+  # 正式环境：https://openapi.alipay.com/gateway.do
+  gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+  
+  # 支付成功后用户跳转的页面（前端地址）
+  return-url: http://localhost:8080/api/reservation/pay/return
+  
+  # 前端站点基础地址（支付完成后由后端重定向到该站点，请填写实际访问前端的地址与端口）
+  frontend-base-url: http://localhost:3000
+  
+  # 支付异步通知地址（后端地址，需要公网可访问）
+  # 本地开发可以使用内网穿透工具（如ngrok、natapp）
+  notify-url: http://localhost:8080/api/reservation/pay/notify
+

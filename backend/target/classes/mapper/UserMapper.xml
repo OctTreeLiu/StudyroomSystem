@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.studyspace.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.studyspace.entity.User">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="real_name" property="realName" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="LONGVARCHAR"/>
+        <result column="gender" property="gender" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="INTEGER"/>
+        <result column="hobby" property="hobby" jdbcType="VARCHAR"/>
+        <result column="university" property="university" jdbcType="VARCHAR"/>
+        <result column="signature" property="signature" jdbcType="VARCHAR"/>
+        <result column="total_points" property="totalPoints" jdbcType="INTEGER"/>
+        <result column="member_type" property="memberType" jdbcType="TINYINT"/>
+        <result column="member_expire_time" property="memberExpireTime" jdbcType="TIMESTAMP"/>
+        <result column="role" property="role" jdbcType="TINYINT"/>
+        <result column="status" property="status" jdbcType="TINYINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password, real_name, phone, email, avatar_url, gender, age, hobby, university, signature, total_points, member_type, member_expire_time, role, status, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByRole" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user
+        WHERE role = #{role}
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.studyspace.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (username, password, real_name, phone, email, role, status)
+        VALUES (#{username}, #{password}, #{realName}, #{phone}, #{email}, #{role}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.studyspace.entity.User">
+        UPDATE user
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="hobby != null">hobby = #{hobby},</if>
+            <if test="university != null">university = #{university},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="totalPoints != null">total_points = #{totalPoints},</if>
+            <if test="memberType != null">member_type = #{memberType},</if>
+            <if test="memberExpireTime != null">member_expire_time = #{memberExpireTime},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+
