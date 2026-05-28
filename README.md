@@ -101,6 +101,8 @@ npm run dev
 | 后端 API | http://localhost:8080/api |
 | 管理员账号 | admin / 123456 |
 
+如果选择导入包含数据的sql文件，管理员密码为admin123
+
 ## 项目结构
 
 ```
