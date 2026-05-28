@@ -3,6 +3,7 @@
 基于 **Spring Boot + Vue 3** 的前后端分离自习室管理平台，支持在线预约、座位管理、支付宝沙箱支付、会员与积分、学习统计、留言互动、通知推送及 AI 助手（通义千问）等功能。
 
 ## 效果图
+包含网站首页、用户登录、个人信息、查看/预约座位、出示入场凭证和ai智能体聊天功能
 
 <img width="1918" height="906" alt="首页图" src="https://github.com/user-attachments/assets/9bf6c34e-6713-41de-bae1-b3c92ba0ec42" />
 <img width="1919" height="915" alt="登录" src="https://github.com/user-attachments/assets/4b50e0e1-0da1-4bb9-b702-fd4345ae2a0f" />
