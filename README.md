@@ -39,7 +39,7 @@
 
 ```bash
 git clone <你的仓库地址>
-cd code
+cd StudyroomSystem
 ```
 
 ### 2. 导入数据库表结构
@@ -121,7 +121,7 @@ npm run dev
 ## 项目结构
 
 ```
-code/
+StudyroomSystem/
 ├── backend/          # Spring Boot 后端
 ├── frontend/         # Vue 3 前端
 ├── db_sql/           # 数据库 SQL（推荐 studyroom_db_onlytable.sql）
