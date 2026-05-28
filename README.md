@@ -1,4 +1,4 @@
-<img width="1455" height="854" alt="预约表单" src="https://github.com/user-attachments/assets/08c1f790-9f6f-4d54-a39c-04a934f491ed" /><img width="1914" height="907" alt="我的预约" src="https://github.com/user-attachments/assets/b8107389-d45d-43e6-a77a-4b2ea81e947b" /><img width="1919" height="949" alt="自习室查看具体详情" src="https://github.com/user-attachments/assets/fb31c9b0-6392-493b-b709-d6b1e21b6abf" /># 逐光自习室管理系统
+# 逐光自习室管理系统
 
 基于 **Spring Boot + Vue 3** 的前后端分离自习室管理平台，支持在线预约、座位管理、支付宝沙箱支付、会员与积分、学习统计、留言互动、通知推送及 AI 助手（通义千问）等功能。
 
